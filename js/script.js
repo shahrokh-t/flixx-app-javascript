@@ -64,7 +64,6 @@ async function displayMovieDetails() {
   const movie = await fetchAPIData(`movie/${movieId}`);
 
   // Overlay for background image
-
   displayBackgroundImage("movie", movie.backdrop_path);
 
   const div = document.createElement("div");
@@ -118,7 +117,6 @@ async function displayShowDetails() {
   const show = await fetchAPIData(`tv/${showId}`);
 
   // Overlay for background image
-
   displayBackgroundImage("tv", show.backdrop_path);
 
   const div = document.createElement("div");
@@ -180,13 +178,60 @@ function displayBackgroundImage(type, backgroundPath) {
   overlayDiv.style.opacity = "0.1";
 
   if (type === "movie") {
-    document.querySelector("#movie-details").appendChild(overlayDiv)
+    document.querySelector("#movie-details").appendChild(overlayDiv);
   } else {
-    document.querySelector("#show-details").appendChild(overlayDiv)
-
+    document.querySelector("#show-details").appendChild(overlayDiv);
   }
-
 }
+
+// Display slider movies 
+async function displySlider() {
+  const { results } = await fetchAPIData("movie/now_playing");
+
+  results.forEach((movie) => {
+    const div = document.createElement("div");
+    div.classList.add("swiper-slide");
+
+    div.innerHTML = `
+    <a href="movie-details.html?id=${movie.id}">
+    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
+  </a>
+  <h4 class="swiper-rating">
+    <i class="fas fa-star text-secondary"></i> ${movie.vote_average} / 10
+  </h4>
+    `;
+
+    document.querySelector(".swiper-wrapper").appendChild(div);
+
+    initSwiper();
+
+  });
+}
+
+function initSwiper() {
+  const swiper = new Swiper(".swiper", {
+    slidesPerView: 1,
+    spaceBetween: 30,
+    freeMode: true,
+    loop: true,
+    autoplay: {
+      delay: 4000,
+      disableOnInteraction: true,
+    },
+    breakpoints: {
+      500: {
+        slidesPerView: 2
+      },
+      700: {
+        slidesPerView: 3
+      },
+      1200: {
+        slidesPerView: 4
+      }
+    }
+  });
+}
+
 
 // Fetch data from TMDB API
 async function fetchAPIData(endpoint) {
@@ -213,9 +258,6 @@ function hideSpinner() {
 }
 
 
-
-
-
 // Highligh active link
 function highlightActiveLink() {
   const links = document.querySelectorAll(".nav-link");
@@ -235,6 +277,7 @@ function init() {
   switch (global.currentPage) {
     case "/":
     case "/index.html":
+      displySlider();
       displayPopularMovies();
       break;
     case "/shows.html":
